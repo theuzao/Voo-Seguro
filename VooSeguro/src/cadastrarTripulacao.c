@@ -1,75 +1,88 @@
-#include <stdio.h>
-#include <string.h>
+#include "cadastrarTripulacao.h"
 
-#define MAX_TRIPULANTES 50
+// Definição das variáveis globais
+Tripulacao listaTripulacao[MAX_TRIPULACAO];
+int qtdTripulacao = 0;
 
-// Armazenar os dados da tripulação
-typedef struct
-{
-    int codigo;        // Código único do tripulante
-    char nome[50];     // Nome do tripulante
-    char telefone[15]; // Telefone do tripulante
-    char cargo[20];    // Cargo: piloto, copiloto ou comissário
-} Tripulante;
+// Função para validar o telefone (apenas números e tamanho correto)
+int validarTelefone(const char *telefone) {
+    int len = strlen(telefone);
+    if (len == 0 || len > 15) return 0;
+    
+    for (int i = 0; i < len; i++) {
+        if (!isdigit(telefone[i])) return 0;
+    }
+    return 1;
+}
 
-Tripulante listaTripulantes[MAX_TRIPULANTES];
-int qtdTripulantes = 0;
+// Função para validar o cargo
+int validarCargo(const char *cargo) {
+    char cargoMin[20];
+    strcpy(cargoMin, cargo);
+    for (int i = 0; cargoMin[i]; i++) {
+        cargoMin[i] = tolower(cargoMin[i]);
+    }
+    
+    return (strcmp(cargoMin, "piloto") == 0 ||
+            strcmp(cargoMin, "copiloto") == 0 ||
+            strcmp(cargoMin, "comissario") == 0);
+}
 
-// Função para cadastrar um tripulante
-void cadastrarTripulante()
-{
-    if (qtdTripulantes >= MAX_TRIPULANTES)
-    {
-        printf("Capacidade máxima de tripulantes atingida!\n");
+void cadastrarTripulacao() {
+    if (qtdTripulacao >= MAX_TRIPULACAO) {
+        printf("Erro: Limite máximo da tripulação atingido.\n");
         return;
     }
 
-    Tripulante novoTripulante;
+    Tripulacao novoTripulante;
 
-    printf("\n--- Cadastro de Tripulante ---\n");
-    printf("Digite o código do tripulante (número inteiro): ");
+    printf("\n--- Cadastro de Tripulação ---\n");
+    printf("Digite o código do tripulante: ");
     scanf("%d", &novoTripulante.codigo);
 
-    // Validação de código único
-    for (int i = 0; i < qtdTripulantes; i++)
-    {
-        if (listaTripulantes[i].codigo == novoTripulante.codigo)
-        {
+    // Validação de código duplicado
+    for (int i = 0; i < qtdTripulacao; i++) {
+        if (listaTripulacao[i].codigo == novoTripulante.codigo) {
             printf("Erro: Código já cadastrado!\n");
             return;
         }
     }
 
-    printf("Digite o nome do tripulante: ");
+    printf("Digite o nome: ");
     scanf(" %[^\n]s", novoTripulante.nome);
 
-    printf("Digite o telefone do tripulante: ");
-    scanf(" %[^\n]s", novoTripulante.telefone);
+    // Loop para validação do telefone
+    do {
+        printf("Digite o telefone (apenas números, máximo 15 dígitos): ");
+        scanf(" %[^\n]s", novoTripulante.telefone);
+        if (!validarTelefone(novoTripulante.telefone)) {
+            printf("Erro: Telefone inválido!\n");
+        }
+    } while (!validarTelefone(novoTripulante.telefone));
 
-    printf("Digite o cargo do tripulante (piloto, copiloto ou comissário): ");
-    scanf(" %[^\n]s", novoTripulante.cargo);
+    // Loop para validação do cargo
+    do {
+        printf("Digite o cargo (piloto, copiloto, comissario): ");
+        scanf(" %[^\n]s", novoTripulante.cargo);
+        if (!validarCargo(novoTripulante.cargo)) {
+            printf("Erro: Cargo inválido! Use piloto, copiloto ou comissario.\n");
+        }
+    } while (!validarCargo(novoTripulante.cargo));
 
-    // Armazenar o tripulante na lista
-    listaTripulantes[qtdTripulantes] = novoTripulante;
-    qtdTripulantes++;
-
+    listaTripulacao[qtdTripulacao++] = novoTripulante;
     printf("Tripulante cadastrado com sucesso!\n");
 }
 
-// Função para listar tripulantes
-void listarTripulantes()
-{
-    if (qtdTripulantes == 0)
-    {
+void listarTripulacao() {
+    if (qtdTripulacao == 0) {
         printf("Nenhum tripulante cadastrado.\n");
         return;
     }
 
-    printf("\n--- Lista de Tripulantes ---\n");
-    for (int i = 0; i < qtdTripulantes; i++)
-    {
-        Tripulante t = listaTripulantes[i];
-        printf("Codigo: %d, Nome: %s, Telefone: %s, Cargo: %s\n",
+    printf("\n--- Lista da Tripulação ---\n");
+    for (int i = 0; i < qtdTripulacao; i++) {
+        Tripulacao t = listaTripulacao[i];
+        printf("Código: %d, Nome: %s, Telefone: %s, Cargo: %s\n",
                t.codigo, t.nome, t.telefone, t.cargo);
     }
 }

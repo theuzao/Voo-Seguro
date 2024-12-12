@@ -1,84 +1,101 @@
-#include <stdio.h>
-#include <string.h>
+#include "cadastrarPassageiro.h"
 
-// Definições e limites
-#define MAX_PASSAGEIROS 100
+// Definição das variáveis globais que foram declaradas como extern no header
+Passageiro listaPassageiros[MAX_PASSAGEIROS];
+int qtdPassageiros = 0;
 
-// Estrutura de dados para passageiros
-typedef struct
-{
-    int codigo;         // Código único do passageiro
-    char nome[50];      // Nome do passageiro
-    char endereco[100]; // Endereço do passageiro
-    char telefone[15];  // Telefone do passageiro
-    int fidelidade;     // Fidelidade: 0 = Não, 1 = Sim
-} Passageiro;
+// Função que verifica se uma string contém apenas números
+// Retorna 1 se for válido (apenas números) e 0 caso contrário
+int validarNumeros(const char *entrada) {
+    for (int i = 0; entrada[i] != '\0'; i++) {
+        if (!isdigit(entrada[i])) {
+            return 0; // Encontrou um caractere que não é número
+        }
+    }
+    return 1; // Todos os caracteres são números
+}
 
-// Variáveis globais para gerenciamento de passageiros
-Passageiro listaPassageiros[MAX_PASSAGEIROS]; // Vetor para armazenar passageiros
-int qtdPassageiros = 0;                       // Contador de passageiros cadastrados
+// Função que verifica se um endereço é válido
+// Um endereço é considerado válido se não estiver vazio
+int validarEndereco(const char *endereco) {
+    return strlen(endereco) > 0;
+}
 
-// Função para cadastrar passageiro
-void cadastrarPassageiro()
-{
-    if (qtdPassageiros >= MAX_PASSAGEIROS)
-    {
-        printf("Capacidade máxima de passageiros atingida!\n");
+// Função principal para cadastrar um novo passageiro
+// Realiza todas as validações necessárias durante o cadastro
+void cadastrarPassageiro() {
+    // Verifica se ainda há espaço para novos passageiros
+    if (qtdPassageiros >= MAX_PASSAGEIROS) {
+        printf("Erro: Limite máximo de passageiros atingido.\n");
         return;
     }
 
     Passageiro novoPassageiro;
 
-    // Captura dos dados
     printf("\n--- Cadastro de Passageiro ---\n");
-    printf("Digite o código do passageiro (número inteiro): ");
+    printf("Digite o código do passageiro: ");
     scanf("%d", &novoPassageiro.codigo);
 
-    // Validação do código
-    for (int i = 0; i < qtdPassageiros; i++)
-    {
-        if (listaPassageiros[i].codigo == novoPassageiro.codigo)
-        {
+    // Verifica se o código já está em uso
+    for (int i = 0; i < qtdPassageiros; i++) {
+        if (listaPassageiros[i].codigo == novoPassageiro.codigo) {
             printf("Erro: Código já cadastrado!\n");
             return;
         }
     }
 
-    // Captura de dados restantes
-    printf("Digite o nome do passageiro: ");
+    // Captura e armazena o nome do passageiro
+    printf("Digite o nome: ");
     scanf(" %[^\n]s", novoPassageiro.nome);
 
-    printf("Digite o endereço do passageiro: ");
-    scanf(" %[^\n]s", novoPassageiro.endereco);
+    // Loop para garantir que um endereço válido seja fornecido
+    while (1) {
+        printf("Digite o endereço: ");
+        scanf(" %[^\n]s", novoPassageiro.endereco);
+        
+        if (validarEndereco(novoPassageiro.endereco)) {
+            break; // Endereço válido, sai do loop
+        } else {
+            printf("Erro: O endereço não pode estar vazio.\n");
+        }
+    }
 
-    printf("Digite o telefone do passageiro: ");
-    scanf(" %[^\n]s", novoPassageiro.telefone);
+    // Loop para garantir que um telefone válido seja fornecido
+    while (1) {
+        printf("Digite o telefone (somente números, máx. 15 caracteres): ");
+        scanf(" %[^\n]s", novoPassageiro.telefone);
+        
+        if (validarNumeros(novoPassageiro.telefone) && strlen(novoPassageiro.telefone) <= 15) {
+            break; // Telefone válido, sai do loop
+        } else {
+            printf("Erro: Telefone inválido! Insira apenas números (máx. 15 caracteres).\n");
+        }
+    }
 
-    printf("O passageiro participa do programa de fidelidade? (1 = Sim, 0 = Não): ");
+    // Captura a informação sobre participação no programa de fidelidade
+    printf("Participa do programa de fidelidade? (1 = Sim, 0 = Não): ");
     scanf("%d", &novoPassageiro.fidelidade);
 
-    // Armazenamento no vetor
-    listaPassageiros[qtdPassageiros] = novoPassageiro;
-    qtdPassageiros++;
-
+    // Adiciona o novo passageiro à lista e incrementa o contador
+    listaPassageiros[qtdPassageiros++] = novoPassageiro;
     printf("Passageiro cadastrado com sucesso!\n");
 }
 
-// Função para listar passageiros
-void listarPassageiros()
-{
-    if (qtdPassageiros == 0)
-    {
+// Função para exibir todos os passageiros cadastrados
+void listarPassageiros() {
+    if (qtdPassageiros == 0) {
         printf("Nenhum passageiro cadastrado.\n");
         return;
     }
 
     printf("\n--- Lista de Passageiros ---\n");
-    for (int i = 0; i < qtdPassageiros; i++)
-    {
-        Passageiro p = listaPassageiros[i];
-        printf("Codigo: %d, Nome: %s, Endereco: %s, Telefone: %s, Fidelidade: %s\n",
-               p.codigo, p.nome, p.endereco, p.telefone,
-               p.fidelidade ? "Sim" : "Não");
+    for (int i = 0; i < qtdPassageiros; i++) {
+        Passageiro passageiroAtual = listaPassageiros[i];
+        printf("Código: %d, Nome: %s, Endereço: %s, Telefone: %s, Fidelidade: %s\n",
+               passageiroAtual.codigo, 
+               passageiroAtual.nome, 
+               passageiroAtual.endereco,
+               passageiroAtual.telefone, 
+               passageiroAtual.fidelidade ? "Sim" : "Não");
     }
 }
