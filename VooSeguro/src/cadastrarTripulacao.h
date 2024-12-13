@@ -11,17 +11,20 @@ typedef struct {
     int codigo;
     char nome[50];
     char telefone[15];
-    char cargo[20];
+    char cargo[20];  // piloto, copiloto, comissário
 } Tripulacao;
 
-// Variáveis globais
 extern Tripulacao listaTripulacao[MAX_TRIPULACAO];
 extern int qtdTripulacao;
 
-// Funções
-int validarTelefone(const char *telefone);
-int validarCargo(const char *cargo);
+// Funções de validação
+int validarCargoTripulacao(const char *cargo);
+int validarNomeTripulacao(const char *nome);
+int validarTelefoneTripulacao(const char *telefone);
+
+// Funções principais
 void cadastrarTripulacao();
 void listarTripulacao();
+int verificarTripulacaoMinima(int codigoPiloto, int codigoCopiloto);
 
 #endif

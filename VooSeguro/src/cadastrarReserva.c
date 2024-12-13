@@ -1,22 +1,23 @@
 #include "cadastrarReserva.h"
 #include <stdlib.h>
 
-// Definição das variáveis globais
 Reserva listaReservas[MAX_RESERVAS];
 int qtdReservas = 0;
 
-// Funções de validação
+void limparBufferReserva() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
 int verificarDisponibilidadeAssento(int codigoVoo, int numeroAssento) {
-    if (numeroAssento <= 0 || numeroAssento > MAX_ASSENTOS) {
-        return 0;  // Assento inválido
-    }
+    if (numeroAssento <= 0 || numeroAssento > MAX_ASSENTOS) return 0;
     
     for (int i = 0; i < qtdVoos; i++) {
         if (listaVoos[i].codigo == codigoVoo) {
-            return !listaAssentos[i][numeroAssento-1].status;  // Retorna 1 se livre, 0 se ocupado
+            return !listaAssentos[i][numeroAssento-1].status;
         }
     }
-    return 0;  // Voo não encontrado
+    return 0;
 }
 
 int validarPassageiroExiste(int codigoPassageiro) {
@@ -37,7 +38,6 @@ int validarVooAtivo(int codigoVoo) {
     return 0;
 }
 
-// Função principal de cadastro
 void cadastrarReserva() {
     if (qtdReservas >= MAX_RESERVAS) {
         printf("Erro: Limite máximo de reservas atingido.\n");
@@ -45,38 +45,56 @@ void cadastrarReserva() {
     }
 
     Reserva novaReserva;
-    
+
     printf("\n--- Cadastro de Reserva ---\n");
-    printf("Digite o código da reserva: ");
-    scanf("%d", &novaReserva.codigo);
-
-    // Validação de código duplicado
-    for (int i = 0; i < qtdReservas; i++) {
-        if (listaReservas[i].codigo == novaReserva.codigo) {
-            printf("Erro: Código de reserva já existe!\n");
-            return;
+    
+    // Validação do código da reserva
+    while (1) {
+        printf("Digite o código da reserva: ");
+        if (scanf("%d", &novaReserva.codigo) != 1 || novaReserva.codigo <= 0) {
+            printf("Erro: Código inválido!\n");
+            limparBufferReserva();
+            continue;
         }
+        
+        int codigoExiste = 0;
+        for (int i = 0; i < qtdReservas; i++) {
+            if (listaReservas[i].codigo == novaReserva.codigo) {
+                codigoExiste = 1;
+                break;
+            }
+        }
+        
+        if (codigoExiste) {
+            printf("Erro: Código de reserva já existe!\n");
+            continue;
+        }
+        break;
     }
+    limparBufferReserva();
 
-    printf("Digite o código do passageiro: ");
-    scanf("%d", &novaReserva.codigoPassageiro);
-    if (!validarPassageiroExiste(novaReserva.codigoPassageiro)) {
+    // Validação do passageiro
+    while (1) {
+        printf("Digite o código do passageiro: ");
+        scanf("%d", &novaReserva.codigoPassageiro);
+        if (validarPassageiroExiste(novaReserva.codigoPassageiro)) break;
         printf("Erro: Passageiro não encontrado!\n");
-        return;
     }
 
-    printf("Digite o código do voo: ");
-    scanf("%d", &novaReserva.codigoVoo);
-    if (!validarVooAtivo(novaReserva.codigoVoo)) {
+    // Validação do voo
+    while (1) {
+        printf("Digite o código do voo: ");
+        scanf("%d", &novaReserva.codigoVoo);
+        if (validarVooAtivo(novaReserva.codigoVoo)) break;
         printf("Erro: Voo não encontrado ou inativo!\n");
-        return;
     }
 
-    printf("Digite o número do assento (1-%d): ", MAX_ASSENTOS);
-    scanf("%d", &novaReserva.numeroAssento);
-    if (!verificarDisponibilidadeAssento(novaReserva.codigoVoo, novaReserva.numeroAssento)) {
-        printf("Erro: Assento não disponível ou inválido!\n");
-        return;
+    // Validação do assento
+    while (1) {
+        printf("Digite o número do assento (1-%d): ", MAX_ASSENTOS);
+        scanf("%d", &novaReserva.numeroAssento);
+        if (verificarDisponibilidadeAssento(novaReserva.codigoVoo, novaReserva.numeroAssento)) break;
+        printf("Erro: Assento indisponível ou inválido!\n");
     }
 
     // Calcula valor total e marca assento como ocupado
@@ -91,13 +109,15 @@ void cadastrarReserva() {
     listaReservas[qtdReservas++] = novaReserva;
     atualizarPontosFidelidade(novaReserva.codigoPassageiro);
     
-    printf("Reserva cadastrada com sucesso!\n");
+    printf("\nReserva cadastrada com sucesso!\n");
     printf("Valor total: R$ %.2f\n", novaReserva.valorTotal);
+    printf("============================\n");
 }
 
 void baixarReserva() {
     int codigoReserva;
-    printf("\nDigite o código da reserva para baixa: ");
+    printf("\n--- Baixa de Reserva ---\n");
+    printf("Digite o código da reserva: ");
     scanf("%d", &codigoReserva);
 
     for (int i = 0; i < qtdReservas; i++) {
@@ -110,28 +130,29 @@ void baixarReserva() {
                 }
             }
             
-            printf("Reserva baixada com sucesso!\n");
-            printf("Valor da reserva: R$ %.2f\n", listaReservas[i].valorTotal);
+            printf("\nReserva cancelada com sucesso!\n");
+            printf("Valor a ser reembolsado: R$ %.2f\n", listaReservas[i].valorTotal);
             
             // Remove a reserva (move a última para esta posição)
             listaReservas[i] = listaReservas[--qtdReservas];
             return;
         }
     }
-    printf("Erro: Reserva não encontrada!\n");
+    printf("Reserva não encontrada!\n");
 }
 
 void listarReservasPassageiro(int codigoPassageiro) {
     int encontrou = 0;
-    printf("\n--- Reservas do Passageiro ---\n");
+    printf("\n=== Reservas do Passageiro ===\n");
     
     for (int i = 0; i < qtdReservas; i++) {
         if (listaReservas[i].codigoPassageiro == codigoPassageiro) {
-            printf("Código da Reserva: %d\n", listaReservas[i].codigo);
-            printf("Código do Voo: %d\n", listaReservas[i].codigoVoo);
+            printf("\nReserva %d:\n", i+1);
+            printf("Código: %d\n", listaReservas[i].codigo);
+            printf("Voo: %d\n", listaReservas[i].codigoVoo);
             printf("Assento: %d\n", listaReservas[i].numeroAssento);
             printf("Valor: R$ %.2f\n", listaReservas[i].valorTotal);
-            printf("--------------------\n");
+            printf("----------------------------\n");
             encontrou = 1;
         }
     }
@@ -139,35 +160,4 @@ void listarReservasPassageiro(int codigoPassageiro) {
     if (!encontrou) {
         printf("Nenhuma reserva encontrada para este passageiro.\n");
     }
-}
-
-void atualizarPontosFidelidade(int codigoPassageiro) {
-    for (int i = 0; i < qtdPassageiros; i++) {
-        if (listaPassageiros[i].codigo == codigoPassageiro && 
-            listaPassageiros[i].fidelidade) {
-            printf("Pontos de fidelidade adicionados: %d\n", PONTOS_POR_VOO);
-            return;
-        }
-    }
-}
-
-void consultarPontosFidelidade(int codigoPassageiro) {
-    for (int i = 0; i < qtdPassageiros; i++) {
-        if (listaPassageiros[i].codigo == codigoPassageiro) {
-            if (listaPassageiros[i].fidelidade) {
-                int totalPontos = 0;
-                // Conta número de voos do passageiro
-                for (int j = 0; j < qtdReservas; j++) {
-                    if (listaReservas[j].codigoPassageiro == codigoPassageiro) {
-                        totalPontos += PONTOS_POR_VOO;
-                    }
-                }
-                printf("Total de pontos: %d\n", totalPontos);
-            } else {
-                printf("Passageiro não participa do programa de fidelidade.\n");
-            }
-            return;
-        }
-    }
-    printf("Passageiro não encontrado.\n");
 }

@@ -5,25 +5,26 @@
 #include <string.h>
 #include <ctype.h>
 
-// Definições e limites
 #define MAX_PASSAGEIROS 100
 
-// Estrutura para passageiros
 typedef struct {
     int codigo;
     char nome[50];
     char endereco[100];
     char telefone[15];
     int fidelidade;
+    int pontosFidelidade; 
 } Passageiro;
 
-// Declaração de variáveis globais (extern indica que serão definidas em outro arquivo)
 extern Passageiro listaPassageiros[MAX_PASSAGEIROS];
 extern int qtdPassageiros;
 
-// Declaração das funções (protótipos)
-int validarNumeros(const char *entrada);
+// Funções de validação
+int validarNome(const char *nome);
 int validarEndereco(const char *endereco);
+int validarTelefone(const char *telefone);
+
+// Funções principais
 void cadastrarPassageiro();
 void listarPassageiros();
 

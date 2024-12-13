@@ -9,7 +9,8 @@ LIB_DIR = lib/munit
 BASE_SOURCES = $(SRC_DIR)/cadastrarTripulacao.c \
                $(SRC_DIR)/cadastrarPassageiro.c \
                $(SRC_DIR)/cadastrarVoo.c \
-               $(SRC_DIR)/cadastrarReserva.c
+               $(SRC_DIR)/cadastrarReserva.c \
+               $(SRC_DIR)/pesquisa.c
 
 # Executáveis
 MAIN = vooseguro
@@ -40,8 +41,12 @@ test: $(TEST_PASSAGEIRO) $(TEST_TRIPULACAO) $(TEST_VOO) $(TEST_RESERVA)
 	./$(TEST_TRIPULACAO)
 	./$(TEST_VOO)
 	./$(TEST_RESERVA)
+	@echo "Todos os testes foram executados com sucesso!"
 
 clean:
 	rm -f $(MAIN) $(TEST_PASSAGEIRO) $(TEST_TRIPULACAO) $(TEST_VOO) $(TEST_RESERVA)
 
-.PHONY: all test clean
+run: $(MAIN)
+	./$(MAIN)
+
+.PHONY: all test clean run

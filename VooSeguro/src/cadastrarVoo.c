@@ -1,27 +1,30 @@
 #include "cadastrarVoo.h"
 #include <stdlib.h>
+#include <ctype.h>
 
 Voo listaVoos[MAX_VOOS];
 Assento listaAssentos[MAX_VOOS][MAX_ASSENTOS];
 int qtdVoos = 0;
 
+void limparBufferVoo() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
 int validarData(const char *data) {
     if (strlen(data) != 10) return 0;
     if (data[2] != '/' || data[5] != '/') return 0;
 
-    struct tm tm = {0};
-    char dia[3], mes[3], ano[5];
-    strncpy(dia, data, 2); dia[2] = '\0';
-    strncpy(mes, data + 3, 2); mes[2] = '\0';
-    strncpy(ano, data + 6, 4); ano[4] = '\0';
+    int dia, mes, ano;
+    sscanf(data, "%d/%d/%d", &dia, &mes, &ano);
 
-    tm.tm_mday = atoi(dia);
-    tm.tm_mon = atoi(mes) - 1;
-    tm.tm_year = atoi(ano) - 1900;
-
-    if (tm.tm_mday < 1 || tm.tm_mday > 31) return 0;
-    if (tm.tm_mon < 0 || tm.tm_mon > 11) return 0;
-    if (tm.tm_year < 124) return 0;  // Não aceita datas anteriores a 2024
+    if (ano < 2024) return 0;  // Não aceita datas passadas
+    if (mes < 1 || mes > 12) return 0;
+    
+    int diasPorMes[] = {0,31,28,31,30,31,30,31,31,30,31,30,31};
+    if (ano % 4 == 0) diasPorMes[2] = 29;  // Ano bissexto
+    
+    if (dia < 1 || dia > diasPorMes[mes]) return 0;
 
     return 1;
 }
@@ -30,8 +33,8 @@ int validarHora(const char *hora) {
     if (strlen(hora) != 5) return 0;
     if (hora[2] != ':') return 0;
 
-    int h = atoi(hora);
-    int m = atoi(hora + 3);
+    int h, m;
+    sscanf(hora, "%d:%d", &h, &m);
 
     if (h < 0 || h > 23) return 0;
     if (m < 0 || m > 59) return 0;
@@ -39,29 +42,8 @@ int validarHora(const char *hora) {
     return 1;
 }
 
-int validarTripulacaoMinima(int codigoPiloto, int codigoCopiloto) {
-    int pilotoEncontrado = 0, copilotoEncontrado = 0;
-
-    for (int i = 0; i < qtdTripulacao; i++) {
-        if (listaTripulacao[i].codigo == codigoPiloto && 
-            strcmp(listaTripulacao[i].cargo, "piloto") == 0) {
-            pilotoEncontrado = 1;
-        }
-        if (listaTripulacao[i].codigo == codigoCopiloto && 
-            strcmp(listaTripulacao[i].cargo, "copiloto") == 0) {
-            copilotoEncontrado = 1;
-        }
-    }
-
-    return pilotoEncontrado && copilotoEncontrado;
-}
-
-void configurarAssentos(int codigoVoo) {
-    for (int i = 0; i < MAX_ASSENTOS; i++) {
-        listaAssentos[codigoVoo][i].numero = i + 1;
-        listaAssentos[codigoVoo][i].codigoVoo = codigoVoo;
-        listaAssentos[codigoVoo][i].status = 0;  // livre
-    }
+int validarTarifa(float tarifa) {
+    return tarifa > 0.0;
 }
 
 void cadastrarVoo() {
@@ -71,87 +53,136 @@ void cadastrarVoo() {
     }
 
     Voo novoVoo;
-    char dataTemp[11], horaTemp[6];
 
     printf("\n--- Cadastro de Voo ---\n");
-    printf("Digite o código do voo: ");
-    scanf("%d", &novoVoo.codigo);
-
-    for (int i = 0; i < qtdVoos; i++) {
-        if (listaVoos[i].codigo == novoVoo.codigo) {
-            printf("Erro: Código de voo já cadastrado!\n");
-            return;
+    
+    // Validação do código do voo
+    while (1) {
+        printf("Digite o código do voo: ");
+        if (scanf("%d", &novoVoo.codigo) != 1 || novoVoo.codigo <= 0) {
+            printf("Erro: Código inválido!\n");
+            limparBufferVoo();
+            continue;
         }
+        
+        int codigoExiste = 0;
+        for (int i = 0; i < qtdVoos; i++) {
+            if (listaVoos[i].codigo == novoVoo.codigo) {
+                codigoExiste = 1;
+                break;
+            }
+        }
+        
+        if (codigoExiste) {
+            printf("Erro: Código de voo já existe!\n");
+            continue;
+        }
+        break;
+    }
+    limparBufferVoo();
+
+    // Validação da data
+    while (1) {
+        printf("Digite a data (DD/MM/AAAA): ");
+        if (fgets(novoVoo.data, sizeof(novoVoo.data), stdin)) {
+            novoVoo.data[strcspn(novoVoo.data, "\n")] = 0;
+            if (validarData(novoVoo.data)) break;
+        }
+        printf("Erro: Data inválida! Use o formato DD/MM/AAAA e data futura.\n");
     }
 
-    do {
-        printf("Digite a data (DD/MM/AAAA): ");
-        scanf(" %10s", dataTemp);
-        if (!validarData(dataTemp)) {
-            printf("Erro: Data inválida!\n");
-        }
-    } while (!validarData(dataTemp));
-    strcpy(novoVoo.data, dataTemp);
-
-    do {
+    // Validação da hora
+    while (1) {
         printf("Digite a hora (HH:MM): ");
-        scanf(" %5s", horaTemp);
-        if (!validarHora(horaTemp)) {
-            printf("Erro: Hora inválida!\n");
+        if (fgets(novoVoo.hora, sizeof(novoVoo.hora), stdin)) {
+            novoVoo.hora[strcspn(novoVoo.hora, "\n")] = 0;
+            if (validarHora(novoVoo.hora)) break;
         }
-    } while (!validarHora(horaTemp));
-    strcpy(novoVoo.hora, horaTemp);
+        printf("Erro: Hora inválida! Use o formato HH:MM (24h).\n");
+    }
 
     printf("Digite a origem: ");
-    scanf(" %[^\n]s", novoVoo.origem);
-    
-    printf("Digite o destino: ");
-    scanf(" %[^\n]s", novoVoo.destino);
-    
-    printf("Digite o código do avião: ");
-    scanf("%d", &novoVoo.codigoAviao);
-    
-    printf("Digite o código do piloto: ");
-    scanf("%d", &novoVoo.codigoPiloto);
-    
-    printf("Digite o código do copiloto: ");
-    scanf("%d", &novoVoo.codigoCopiloto);
+    fgets(novoVoo.origem, sizeof(novoVoo.origem), stdin);
+    novoVoo.origem[strcspn(novoVoo.origem, "\n")] = 0;
 
-    if (!validarTripulacaoMinima(novoVoo.codigoPiloto, novoVoo.codigoCopiloto)) {
-        printf("Erro: Tripulação mínima não atendida (piloto e copiloto necessários)!\n");
-        return;
+    printf("Digite o destino: ");
+    fgets(novoVoo.destino, sizeof(novoVoo.destino), stdin);
+    novoVoo.destino[strcspn(novoVoo.destino, "\n")] = 0;
+
+    // Validação da tarifa
+    while (1) {
+        printf("Digite a tarifa: R$ ");
+        if (scanf("%f", &novoVoo.tarifa) == 1 && validarTarifa(novoVoo.tarifa)) {
+            break;
+        }
+        printf("Erro: Tarifa inválida! Digite um valor maior que zero.\n");
+        limparBufferVoo();
+    }
+    limparBufferVoo();
+
+    // Validação da tripulação
+    printf("\nCadastro da Tripulação do Voo\n");
+    while (1) {
+        printf("Digite o código do piloto: ");
+        scanf("%d", &novoVoo.codigoPiloto);
+        printf("Digite o código do copiloto: ");
+        scanf("%d", &novoVoo.codigoCopiloto);
+        
+        if (verificarTripulacaoMinima(novoVoo.codigoPiloto, novoVoo.codigoCopiloto)) {
+            break;
+        }
+        printf("Erro: Tripulação inválida! Verifique os códigos do piloto e copiloto.\n");
     }
 
     printf("Digite o código do comissário: ");
     scanf("%d", &novoVoo.codigoComissario);
-    
-    printf("Digite a tarifa: ");
-    scanf("%f", &novoVoo.tarifa);
+    limparBufferVoo();
 
-    novoVoo.status = 1;  // Ativo por padrão
+    // Configura o status inicial como ativo
+    novoVoo.status = 1;
+
+    // Salva o voo e configura os assentos
     listaVoos[qtdVoos] = novoVoo;
     configurarAssentos(qtdVoos);
     qtdVoos++;
 
-    printf("Voo cadastrado com sucesso!\n");
+    printf("\nVoo cadastrado com sucesso!\n");
+    printf("============================\n");
+}
+
+void configurarAssentos(int indiceVoo) {
+    for (int i = 0; i < MAX_ASSENTOS; i++) {
+        listaAssentos[indiceVoo][i].numero = i + 1;
+        listaAssentos[indiceVoo][i].codigoVoo = listaVoos[indiceVoo].codigo;
+        listaAssentos[indiceVoo][i].status = 0;  // Livre
+    }
 }
 
 void listarVoos() {
     if (qtdVoos == 0) {
-        printf("Nenhum voo cadastrado.\n");
+        printf("\nNenhum voo cadastrado.\n");
         return;
     }
 
-    printf("\n--- Lista de Voos ---\n");
+    printf("\n=== Lista de Voos ===\n");
     for (int i = 0; i < qtdVoos; i++) {
-        Voo v = listaVoos[i];
-        printf("Código: %d\n", v.codigo);
-        printf("Data: %s\n", v.data);
-        printf("Hora: %s\n", v.hora);
-        printf("Origem: %s\n", v.origem);
-        printf("Destino: %s\n", v.destino);
-        printf("Status: %s\n", v.status ? "Ativo" : "Inativo");
-        printf("Tarifa: R$ %.2f\n", v.tarifa);
-        printf("--------------------\n");
+        printf("\nVoo %d:\n", i+1);
+        printf("Código: %d\n", listaVoos[i].codigo);
+        printf("Data: %s\n", listaVoos[i].data);
+        printf("Hora: %s\n", listaVoos[i].hora);
+        printf("Origem: %s\n", listaVoos[i].origem);
+        printf("Destino: %s\n", listaVoos[i].destino);
+        printf("Tarifa: R$ %.2f\n", listaVoos[i].tarifa);
+        printf("Status: %s\n", listaVoos[i].status ? "Ativo" : "Inativo");
+        printf("----------------------------\n");
     }
+}
+
+int verificarStatusVoo(int codigoVoo) {
+    for (int i = 0; i < qtdVoos; i++) {
+        if (listaVoos[i].codigo == codigoVoo) {
+            return listaVoos[i].status;
+        }
+    }
+    return 0;  // Voo não encontrado
 }
