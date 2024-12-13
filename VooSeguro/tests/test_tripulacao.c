@@ -4,6 +4,8 @@
 /* Função de preparação (setup)
    Esta função é executada antes de cada teste para garantir um ambiente limpo */
 static void* test_setup(const MunitParameter params[], void* user_data) {
+    (void) params;
+    (void) user_data;
     qtdTripulacao = 0;  // Reseta o contador
     memset(listaTripulacao, 0, sizeof(listaTripulacao));  // Limpa a lista
     return NULL;
@@ -12,18 +14,21 @@ static void* test_setup(const MunitParameter params[], void* user_data) {
 /* Teste de validação de cargo
    Verifica se a função aceita apenas os cargos permitidos */
 static MunitResult test_validar_cargo(const MunitParameter params[], void* data) {
+    (void) params;
+    (void) data;
+
     // Teste com cargos válidos
-    munit_assert_true(validarCargo("piloto"));
-    munit_assert_true(validarCargo("copiloto"));
-    munit_assert_true(validarCargo("comissario"));
+    munit_assert_true(validarCargoTripulacao("piloto"));
+    munit_assert_true(validarCargoTripulacao("copiloto"));
+    munit_assert_true(validarCargoTripulacao("comissario"));
     
     // Teste com variações de maiúsculas/minúsculas
-    munit_assert_true(validarCargo("PILOTO"));
-    munit_assert_true(validarCargo("Copiloto"));
+    munit_assert_true(validarCargoTripulacao("PILOTO"));
+    munit_assert_true(validarCargoTripulacao("Copiloto"));
     
     // Teste com cargos inválidos
-    munit_assert_false(validarCargo("engenheiro"));
-    munit_assert_false(validarCargo(""));
+    munit_assert_false(validarCargoTripulacao("engenheiro"));
+    munit_assert_false(validarCargoTripulacao(""));
     
     return MUNIT_OK;
 }
@@ -31,14 +36,17 @@ static MunitResult test_validar_cargo(const MunitParameter params[], void* data)
 /* Teste de validação de telefone
    Verifica se a função aceita apenas números e respeita o tamanho máximo */
 static MunitResult test_validar_telefone(const MunitParameter params[], void* data) {
+    (void) params;
+    (void) data;
+
     // Teste com telefones válidos
-    munit_assert_true(validarTelefone("1234567890"));
-    munit_assert_true(validarTelefone("31999999999"));
+    munit_assert_true(validarTelefoneTripulacao("1234567890"));
+    munit_assert_true(validarTelefoneTripulacao("31999999999"));
     
     // Teste com telefones inválidos
-    munit_assert_false(validarTelefone("123-456-789")); // Contém caracteres especiais
-    munit_assert_false(validarTelefone("")); // Vazio
-    munit_assert_false(validarTelefone("1234567890123456")); // Muito longo
+    munit_assert_false(validarTelefoneTripulacao("123-456-789")); // Contém caracteres especiais
+    munit_assert_false(validarTelefoneTripulacao("")); // Vazio
+    munit_assert_false(validarTelefoneTripulacao("1234567890123456")); // Muito longo
     
     return MUNIT_OK;
 }
@@ -46,6 +54,9 @@ static MunitResult test_validar_telefone(const MunitParameter params[], void* da
 /* Teste de cadastro de tripulação
    Verifica se é possível cadastrar um membro da tripulação corretamente */
 static MunitResult test_cadastro_tripulacao(const MunitParameter params[], void* data) {
+    (void) params;
+    (void) data;
+
     // Preparar dados de teste
     Tripulacao novo = {
         .codigo = 1,

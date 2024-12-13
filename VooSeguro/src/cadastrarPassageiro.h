@@ -23,6 +23,7 @@ extern int qtdPassageiros;
 int validarNome(const char *nome);
 int validarEndereco(const char *endereco);
 int validarTelefone(const char *telefone);
+int validarNumeros(const char *input);
 
 // Funções principais
 void cadastrarPassageiro();

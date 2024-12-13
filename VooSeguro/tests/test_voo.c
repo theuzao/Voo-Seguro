@@ -2,6 +2,8 @@
 #include "../src/cadastrarVoo.h"
 
 static void* test_setup(const MunitParameter params[], void* user_data) {
+    (void) params; // Ignora parâmetro não utilizado
+    (void) user_data; // Ignora parâmetro não utilizado
     qtdVoos = 0;
     memset(listaVoos, 0, sizeof(listaVoos));
     memset(listaAssentos, 0, sizeof(listaAssentos));
@@ -9,6 +11,9 @@ static void* test_setup(const MunitParameter params[], void* user_data) {
 }
 
 static MunitResult test_validar_data(const MunitParameter params[], void* data) {
+    (void) params; // Ignora parâmetro não utilizado
+    (void) data; // Ignora parâmetro não utilizado
+
     // Datas válidas
     munit_assert_true(validarData("01/01/2024"));
     munit_assert_true(validarData("31/12/2024"));
@@ -23,6 +28,9 @@ static MunitResult test_validar_data(const MunitParameter params[], void* data) 
 }
 
 static MunitResult test_validar_hora(const MunitParameter params[], void* data) {
+    (void) params; // Ignora parâmetro não utilizado
+    (void) data; // Ignora parâmetro não utilizado
+
     // Horas válidas
     munit_assert_true(validarHora("00:00"));
     munit_assert_true(validarHora("23:59"));

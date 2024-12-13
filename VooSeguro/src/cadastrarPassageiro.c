@@ -17,6 +17,18 @@ int validarNome(const char *nome) {
    return 1;
 }
 
+int validarNumeros(const char *input) {
+    if (input == NULL || *input == '\0') {
+        return 0; // Retorna falso se a string for nula ou vazia
+    }
+    for (int i = 0; input[i] != '\0'; i++) {
+        if (!isdigit(input[i])) {
+            return 0; // Retorna falso se encontrar um caractere não numérico
+        }
+    }
+    return 1; // Retorna verdadeiro se todos os caracteres forem números
+}
+
 int validarEndereco(const char *endereco) {
    if (strlen(endereco) < 5 || strlen(endereco) > 100) return 0;
    

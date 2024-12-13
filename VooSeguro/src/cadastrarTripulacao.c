@@ -36,15 +36,21 @@ int validarNomeTripulacao(const char *nome) {
 }
 
 int validarTelefoneTripulacao(const char *telefone) {
-    if (strlen(telefone) != 11) return 0;
-    
-    for (int i = 0; telefone[i]; i++) {
+    // Verifica se é NULL ou tamanho inválido (10 ou 11 dígitos permitidos)
+    if (telefone == NULL || (strlen(telefone) != 10 && strlen(telefone) != 11)) {
+        return 0;
+    }
+
+    // Verifica se todos os caracteres são números
+    for (int i = 0; telefone[i] != '\0'; i++) {
         if (!isdigit(telefone[i])) {
-            return 0;
+            return 0; // Falso se houver caracteres não numéricos
         }
     }
-    return 1;
+
+    return 1; // Telefone válido
 }
+
 
 void cadastrarTripulacao() {
     if (qtdTripulacao >= MAX_TRIPULACAO) {

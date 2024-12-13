@@ -5,6 +5,8 @@
 /* Função de preparação (setup)
    Esta função é executada antes de cada teste para garantir um ambiente limpo */
 static void* test_setup(const MunitParameter params[], void* user_data) {
+    (void) params;
+    (void) user_data;
     qtdPassageiros = 0;  // Reseta o contador de passageiros
     memset(listaPassageiros, 0, sizeof(listaPassageiros));  // Limpa o array
     return NULL;
@@ -13,6 +15,9 @@ static void* test_setup(const MunitParameter params[], void* user_data) {
 /* Teste da função validarNumeros() 
    Verifica se a validação de números está funcionando corretamente */
 static MunitResult test_validar_numeros(const MunitParameter params[], void* data) {
+    (void) params;
+    (void) data;
+
     // Teste com entrada válida (apenas números)
     munit_assert_true(validarNumeros("123456789"));
     
@@ -20,7 +25,7 @@ static MunitResult test_validar_numeros(const MunitParameter params[], void* dat
     munit_assert_false(validarNumeros("123abc456"));
     
     // Teste com entrada vazia
-    munit_assert_true(validarNumeros(""));
+    munit_assert_false(validarNumeros(""));
     
     return MUNIT_OK;
 }
@@ -28,6 +33,9 @@ static MunitResult test_validar_numeros(const MunitParameter params[], void* dat
 /* Teste da função validarEndereco() 
    Verifica se a validação de endereço está funcionando corretamente */
 static MunitResult test_validar_endereco(const MunitParameter params[], void* data) {
+    (void) params;
+    (void) data;
+
     // Teste com endereço válido
     munit_assert_true(validarEndereco("Rua das Flores, 123"));
     
@@ -40,6 +48,9 @@ static MunitResult test_validar_endereco(const MunitParameter params[], void* da
 /* Teste do cadastro de passageiro 
    Verifica se é possível cadastrar um passageiro com sucesso */
 static MunitResult test_cadastro_passageiro(const MunitParameter params[], void* data) {
+    (void) params;
+    (void) data;
+
     // Preparar dados de teste
     Passageiro p = {
         .codigo = 1,
