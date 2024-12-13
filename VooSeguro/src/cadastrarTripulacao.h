@@ -22,7 +22,6 @@ int validarCargoTripulacao(const char *cargo);
 int validarNomeTripulacao(const char *nome);
 int validarTelefoneTripulacao(const char *telefone);
 
-
 // Funções principais
 void cadastrarTripulacao();
 void listarTripulacao();

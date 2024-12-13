@@ -12,30 +12,36 @@ void limparBufferVoo() {
 }
 
 int validarData(const char *data) {
-    if (strlen(data) != 10) return 0;
-    if (data[2] != '/' || data[5] != '/') return 0;
+    if (strlen(data) != 10 || data[2] != '/' || data[5] != '/') return 0;
 
     int dia, mes, ano;
-    sscanf(data, "%d/%d/%d", &dia, &mes, &ano);
+    if (sscanf(data, "%d/%d/%d", &dia, &mes, &ano) != 3) return 0;
 
     if (ano < 2024) return 0;  // Não aceita datas passadas
     if (mes < 1 || mes > 12) return 0;
     
     int diasPorMes[] = {0,31,28,31,30,31,30,31,31,30,31,30,31};
-    if (ano % 4 == 0) diasPorMes[2] = 29;  // Ano bissexto
+    if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)) diasPorMes[2] = 29;  // Ano bissexto
     
-    if (dia < 1 || dia > diasPorMes[mes]) return 0;
-
-    return 1;
+    return dia > 0 && dia <= diasPorMes[mes];
 }
 
 int validarHora(const char *hora) {
+    // Verifica o tamanho e o formato básico
     if (strlen(hora) != 5) return 0;
     if (hora[2] != ':') return 0;
 
-    int h, m;
-    sscanf(hora, "%d:%d", &h, &m);
+    // Verifica se são números
+    if (!isdigit(hora[0]) || !isdigit(hora[1]) || 
+        !isdigit(hora[3]) || !isdigit(hora[4])) {
+        return 0;
+    }
 
+    // Converte e valida horas e minutos
+    int h = (hora[0] - '0') * 10 + (hora[1] - '0');
+    int m = (hora[3] - '0') * 10 + (hora[4] - '0');
+
+    // Verifica faixa de valores
     if (h < 0 || h > 23) return 0;
     if (m < 0 || m > 59) return 0;
 
@@ -44,6 +50,17 @@ int validarHora(const char *hora) {
 
 int validarTarifa(float tarifa) {
     return tarifa > 0.0;
+}
+
+int validarLocalizacao(const char *local) {
+    if (strlen(local) < 2 || strlen(local) > 50) return 0;
+
+    for (int i = 0; local[i]; i++) {
+        if (!isalpha(local[i]) && !isspace(local[i])) {
+            return 0;
+        }
+    }
+    return 1;
 }
 
 void cadastrarVoo() {
@@ -91,6 +108,7 @@ void cadastrarVoo() {
         printf("Erro: Data inválida! Use o formato DD/MM/AAAA e data futura.\n");
     }
 
+limparBufferVoo();
     // Validação da hora
     while (1) {
         printf("Digite a hora (HH:MM): ");
@@ -101,13 +119,26 @@ void cadastrarVoo() {
         printf("Erro: Hora inválida! Use o formato HH:MM (24h).\n");
     }
 
-    printf("Digite a origem: ");
-    fgets(novoVoo.origem, sizeof(novoVoo.origem), stdin);
-    novoVoo.origem[strcspn(novoVoo.origem, "\n")] = 0;
+limparBufferVoo();
+    // Validação da origem
+    while (1) {
+        printf("Digite a origem: ");
+        if (fgets(novoVoo.origem, sizeof(novoVoo.origem), stdin)) {
+            novoVoo.origem[strcspn(novoVoo.origem, "\n")] = 0;
+            if (validarLocalizacao(novoVoo.origem)) break;
+        }
+        printf("Erro: Origem inválida! Use apenas letras e espaços.\n");
+    }
 
-    printf("Digite o destino: ");
-    fgets(novoVoo.destino, sizeof(novoVoo.destino), stdin);
-    novoVoo.destino[strcspn(novoVoo.destino, "\n")] = 0;
+    // Validação do destino
+    while (1) {
+        printf("Digite o destino: ");
+        if (fgets(novoVoo.destino, sizeof(novoVoo.destino), stdin)) {
+            novoVoo.destino[strcspn(novoVoo.destino, "\n")] = 0;
+            if (validarLocalizacao(novoVoo.destino)) break;
+        }
+        printf("Erro: Destino inválido! Use apenas letras e espaços.\n");
+    }
 
     // Validação da tarifa
     while (1) {
