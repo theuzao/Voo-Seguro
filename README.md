@@ -1,5 +1,4 @@
-# Sistema de Gerenciamento de Voos desenvolvido em C.
----
+# Sistema de Gerenciamento de Voos - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/c/c-original.svg" alt="c" width="20" height="20"/>
 
 ## Sobre o Projeto
 
